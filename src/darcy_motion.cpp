@@ -14,7 +14,8 @@ class DarcyMotion
     private:
         void teleopCallback(const darcy_motion::Motion::ConstPtr& msg);
         
-        int dir_, delayT_, steps_;
+        int dir_, delayT_;
+        long steps_;
         int stepPin = 4, dirPin = 28;
 
         ros::NodeHandle n;
@@ -35,8 +36,8 @@ DarcyMotion::DarcyMotion():
 }
 
 void DarcyMotion::teleopCallback(const darcy_motion::Motion::ConstPtr& msg) {
-    ROS_INFO("Got %f", msg->wrist_piv);
-    delayT_ = msg->wrist_piv;
+    //ROS_INFO("Got %f", msg->wrist_piv);
+    delayT_ = (msg->wrist_piv < 1000) ? 1000 : msg->wrist_piv;
     dir_ = (msg->wrist_piv > 0) ? 0 : 1;
     steps_++;
 }
@@ -44,6 +45,7 @@ void DarcyMotion::teleopCallback(const darcy_motion::Motion::ConstPtr& msg) {
 void DarcyMotion::spin() {
 
     if (steps_ > 0) {
+        ROS_INFO("Steps: %d Delay: %d", steps_, delayT_);
 
         digitalWrite(dirPin, dir_);
 
@@ -64,13 +66,14 @@ int main (int argc, char **argv)
     ros::init(argc, argv, "darcy_motion");
     DarcyMotion darcy_motion;
     ROS_INFO("darcy_motion initialized. Waiting for input ...");
-    //ros::Rate loop_rate(100);
+    ros::Rate loop_rate(100);
 
     while (ros::ok()) {
 
         darcy_motion.spin();
         ros::spinOnce();     
-     //   loop_rate.sleep();
+        loop_rate.sleep();
+        ROS_INFO("Still okay...");
 
     }
 
