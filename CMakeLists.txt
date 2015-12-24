@@ -128,18 +128,21 @@ include_directories(
 
 ## Declare a C++ executable
 add_executable(darcy_motion src/darcy_motion.cpp)
+add_executable(darcy_teleop src/darcy_teleop.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(darcy_motion_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(darcy_motion darcy_motion_generate_messages_cpp)
+add_dependencies(darcy_teleop darcy_motion_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(darcy_motion_node
 #   ${catkin_LIBRARIES}
 # )
 
-target_link_libraries(darcy_motion ${catkin_LIBRARIES})
+target_link_libraries(darcy_motion ${catkin_LIBRARIES} wiringPi)
+target_link_libraries(darcy_teleop ${catkin_LIBRARIES})
 
 #############
 ## Install ##
