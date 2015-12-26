@@ -8,34 +8,7 @@
  *  -limit switch calibration
  **/
 
-
-#include <ros/ros.h>
-#include <std_msgs/Int8.h>
-#include <wiringPi.h>
-#include <stdlib.h>
-#include <cmath>
-#include <string.h>
-#include <boost/thread.hpp>
-
-class StepperDriver {
-
-    public:
-        StepperDriver();
-        //bool calibrate();
-        int getPosition() const;
-        void ChangeGoal();
-        void spin();
-
-    private:
-        void callback();
-
-        int stepcount_, origin_;
-        int position_, goal_;
-        int steppin_, dirpin_; 
-        int max_per_, min_per_;
-
-};
-
+#include "stepper.h"
 
 StepperDriver::StepperDriver(int stepcount, int max_per, int min_per, 
         int steppin, int dirpin):
@@ -45,29 +18,18 @@ StepperDriver::StepperDriver(int stepcount, int max_per, int min_per,
 {
     ROS_INFO("Initializing stepper_driver node...");
 
+    //system("gpio export 4 out");
+    //system("gpio export 28 out");
     pinMode(steppin, OUTPUT);
     pinMode(dirpin, OUTPUT);
-
+   
+    // lauch update thread 
+    t_(update);
     
 }
+k_
 
-/*(StepperDriver::calibrate(); {
-
-
-  }*/
-
-void StepperDriver::changeGoal(int offset) {
-     if (position_ > stepcount_) {
-        position_ %= stepcoutn_;
-    }
-}   goal += offset;
-}
-
-int StepperDriver::getPosition() {
-    return position;
-}
-
-void StepperDriver::spin() {
+void update() {
     ros::Rate loop_time (100);
 
     while (ros::okay()) {
@@ -95,4 +57,48 @@ void StepperDriver::spin() {
         ros::spinOnce();
     }
 
+}
+
+bool StepperDriver::Offset(float percent) {
+    int ticks = percent * stepcount_;
+    dir_ = ticks < 0 ? BACKWARD : FORWARD;
+
+    // TODO: wrap / take into account absolute
+    /*if (position_ > stepcount_) {
+        position_ %= stepcoutn_;
+    }*/
+
+   return MoveGoal(ticks);
+}
+
+bool MoveGoal(int ticks) {
+    boost::lock_guard<boost::mutex> guard(mtx_);
+    goal_tmp = goal + ticks;
+    if (goal_tmp >= 0 && goal_tmp <= stepcount_) {
+        goal_ = goal_tmp;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool SetDirection(int dir) {
+    boost::lock_guard<boost::mutex> guard(mtx_);
+    if (dir == FORWARD || dir == BACKWARD) {
+        dir_ = dir;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
+/*
+void Set() {
+
+
+}*/
+
+int StepperDriver::get_position() {
+    return position;
 }

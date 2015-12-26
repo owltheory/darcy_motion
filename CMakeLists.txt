@@ -113,6 +113,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -133,7 +134,7 @@ add_executable(darcy_teleop src/darcy_teleop.cpp)
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(darcy_motion_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(darcy_motion darcy_motion_generate_messages_cpp)
+add_dependencies(darcy_motion darcy_motion_generate_messages_cpp stepper_driver.cpp)
 add_dependencies(darcy_teleop darcy_motion_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
