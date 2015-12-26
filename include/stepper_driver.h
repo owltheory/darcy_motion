@@ -11,19 +11,19 @@
 
 class StepperDriver {
     public:
-        StepperDriver();
+        StepperDriver(int, int, int, int, int);
         bool Offset(float percent);
         //void Set();
         int get_position() const;
     private:
         bool SetDirection(int dir);
-        void MoveGoal(int ticks);
+        bool MoveGoal(int ticks);
         void update();
-        int stepcount_, origin_;
+        int stepcount_, origin_, dir_;
         int position_, goal_;
         int steppin_, dirpin_; 
         int max_per_, min_per_;
-        boost::thread t_;
         boost::mutex mtx_;
-}
+        boost::thread t_;
+};
 

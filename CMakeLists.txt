@@ -128,13 +128,13 @@ include_directories(
 # add_dependencies(darcy_motion ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-add_executable(darcy_motion src/darcy_motion.cpp)
-add_executable(darcy_teleop src/darcy_teleop.cpp)
+add_executable(darcy_motion src/darcy_motion.cc src/stepper_driver.cc)
+add_executable(darcy_teleop src/darcy_teleop.cc)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(darcy_motion_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(darcy_motion darcy_motion_generate_messages_cpp stepper_driver.cpp)
+add_dependencies(darcy_motion darcy_motion_generate_messages_cpp stepper_driver.cc)
 add_dependencies(darcy_teleop darcy_motion_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against

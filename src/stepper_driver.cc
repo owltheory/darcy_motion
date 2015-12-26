@@ -8,13 +8,16 @@
  *  -limit switch calibration
  **/
 
-#include "stepper.h"
+#include <ros/ros.h>
+#include <boost/thread.hpp>
+#include "stepper_driver.h"
+#include <stdlib.h>
 
 StepperDriver::StepperDriver(int stepcount, int max_per, int min_per, 
         int steppin, int dirpin):
-    position_(0), goal_(0), origin_(0);
+    position_(0), goal_(0), origin_(0),
     steppin_(steppin), dirpin_(dirpin), 
-    stepcount_(stepcount), topic_(topic)
+    dir_(FORWARD), stepcount_(stepcount)
 {
     ROS_INFO("Initializing stepper_driver node...");
 
@@ -22,33 +25,32 @@ StepperDriver::StepperDriver(int stepcount, int max_per, int min_per,
     //system("gpio export 28 out");
     pinMode(steppin, OUTPUT);
     pinMode(dirpin, OUTPUT);
-   
-    // lauch update thread 
-    t_(update);
     
+    boost::thread t (boost::bind(&StepperDriver::update, this));
+    t_.swap(t); // retain handle on update thread
 }
-k_
 
-void update() {
+void StepperDriver::update() {
     ros::Rate loop_time (100);
+    int step, goal, delay_t;
 
-    while (ros::okay()) {
+    while (ros::ok()) {
         if (position_ != goal_) {
 
             // determine direction
-            int dir = (position_ - goal_ > 0) ? 1 : -1;
-            digitalWrite(dirpin_, dir > 0);
-            position += dir;
+            step = (position_ - goal_ > 0) ? 1 : -1;
+            digitalWrite(dirpin_, step > 0);
+            position_ += step;
 
             // protect against divide by zero
-            int goal = (goal_ == 0) ? 1 : goal_;
+            goal = (goal_ == 0) ? 1 : goal_;
 
             // make delay inversely proportional to delta
-            int delay = (max_per_ - min_per_) * abs(position_ - goal_) / goal + min_per_;
-            digitalWrite(stepPin, HIGH);
-            delay(delay);
-            digitalWrite(stepPin, LOW);
-            delay(delay);
+            delay_t = (max_per_ - min_per_) * abs(position_ - goal_) / goal + min_per_;
+            digitalWrite(steppin_, HIGH);
+            delay(delay_t);
+            digitalWrite(steppin_, LOW);
+            delay(delay_t);
         }
         else {
             loop_time.sleep();
@@ -71,9 +73,9 @@ bool StepperDriver::Offset(float percent) {
    return MoveGoal(ticks);
 }
 
-bool MoveGoal(int ticks) {
+bool StepperDriver::MoveGoal(int ticks) {
     boost::lock_guard<boost::mutex> guard(mtx_);
-    goal_tmp = goal + ticks;
+    int goal_tmp = goal_ + ticks;
     if (goal_tmp >= 0 && goal_tmp <= stepcount_) {
         goal_ = goal_tmp;
         return true;
@@ -82,7 +84,7 @@ bool MoveGoal(int ticks) {
     }
 }
 
-bool SetDirection(int dir) {
+bool StepperDriver::SetDirection(int dir) {
     boost::lock_guard<boost::mutex> guard(mtx_);
     if (dir == FORWARD || dir == BACKWARD) {
         dir_ = dir;
@@ -99,6 +101,7 @@ void Set() {
 
 }*/
 
-int StepperDriver::get_position() {
-    return position;
+int StepperDriver::get_position() const 
+{
+    return position_;
 }

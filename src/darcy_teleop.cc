@@ -29,7 +29,7 @@ void TeleopDarcy::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
 
     darcy_motion::Motion motion;
     motion.base = motion.shoulder = motion.elbow = motion.wrist_rot = 0.0;
-    motion.wrist_piv = 2500 * joy->axes[1];
+    motion.wrist_piv = joy->axes[1];
     motion.grip_closed = true;
     mot_pub.publish(motion);
 

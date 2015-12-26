@@ -4,33 +4,32 @@
 #include <darcy_motion/Motion.h>
 #include <unistd.h> // for usleep
 #include <stdlib.h> // for system
-#include "stepper.h"
+#include "stepper_driver.h"
 #include "pins.h"
 
 class DarcyMotion
 {
     public:
         DarcyMotion();
-        operator()();
      
     private:
         void teleopCallback(const darcy_motion::Motion::ConstPtr& msg);
         
-        ros::NodeHandle n;
+        ros::NodeHandle n_;
         ros::Subscriber teleop_sub_;
         
-        StepperDriver stepA;
+        StepperDriver stepA_;
 };
 
-DarcyMotion::DarcyMotion()
+DarcyMotion::DarcyMotion():
+    stepA_(200, 2300, 1000, STEP_A_STEP, STEP_A_DIR)
 {
     //wiringPiSetupSys();
     wiringPiSetup();
 
-    teleop_sub_ = n.subscribe<darcy_motion::Motion>("teleop_commands", 1000, 
+    teleop_sub_ = n_.subscribe<darcy_motion::Motion>("teleop_commands", 1000, 
             &DarcyMotion::teleopCallback, this);
 
-    stepA (200, 2300, 1000, 4, 28);
 }
 
 void DarcyMotion::teleopCallback(const darcy_motion::Motion::ConstPtr& msg) {
