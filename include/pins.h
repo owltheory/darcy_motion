@@ -1,3 +1,11 @@
-#define STEP_A_STEP  4
-#define STEP_A_DIR   28
+#define STEP_WAIST_STEP  7
+#define STEP_WAIST_DIR   0
+#define STEP_WAIST_LIM 3
 
+#define STEP_SHOULDER_STEP  22
+#define STEP_SHOULDER_DIR   23
+#define STEP_SHOULDER_LIM 3
+
+#define STEP_FOREARM_STEP  24
+#define STEP_FOREARM_DIR   29
+#define STEP_FOREARM_LIM 3 

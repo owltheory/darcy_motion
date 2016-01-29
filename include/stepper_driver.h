@@ -9,11 +9,18 @@
 #define FORWARD 1  
 #define BACKWARD 0
 
+#define TELE_MODE 0 
+#define AUTO_MODE 1
+#define CALIB_MODE 2
+
 class StepperDriver {
     public:
-        StepperDriver(int, int, int, int, int);
+        StepperDriver(int, int, int, int, int, int);
         bool Offset(float percent);
-        //void Set();
+        bool Set(float rate);
+        bool SetMode(int mode);
+        void Calibrate();
+        bool GoTo(int);
         int get_position() const;
     private:
         bool SetDirection(int dir);
@@ -21,8 +28,9 @@ class StepperDriver {
         void update();
         int stepcount_, origin_, dir_;
         int position_, goal_;
-        int steppin_, dirpin_; 
-        int max_per_, min_per_;
+        int steppin_, dirpin_, limitpin_; 
+        int max_per_, min_per_; // in microseconds
+        int mode_, period_; 
         boost::mutex mtx_;
         boost::thread t_;
 };

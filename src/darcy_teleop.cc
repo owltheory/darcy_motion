@@ -19,8 +19,10 @@ private:
 
 TeleopDarcy::TeleopDarcy() {
 
+    nh_.setParam("/joy_node/deadzone", 0.5);
+    nh_.setParam("/joy_node/autorepeat_rate", 20);
     mot_pub = nh_.advertise<darcy_motion::Motion>("teleop_commands", 1);
-    joy_sub = nh_.subscribe<sensor_msgs::Joy>("joy",10,&TeleopDarcy::joyCallback,this);
+    joy_sub = nh_.subscribe<sensor_msgs::Joy>("/joy",10,&TeleopDarcy::joyCallback,this);
 
 }
 
@@ -28,9 +30,10 @@ void TeleopDarcy::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
 {
 
     darcy_motion::Motion motion;
-    motion.base = motion.shoulder = motion.elbow = motion.wrist_rot = 0.0;
-    motion.wrist_piv = joy->axes[1];
-    motion.grip_closed = true;
+    motion.waist = joy->axes[0];
+    motion.shoulder = joy->axes[1];
+    motion.elbow = joy->axes[3];
+    motion.grip = true;
     mot_pub.publish(motion);
 
 }

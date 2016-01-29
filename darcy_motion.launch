@@ -1,0 +1,9 @@
+<launch>
+    
+    <node name="xbox" pkg="joy" type="joy_node">
+        <param name="~autorepeat_rate" value="10" />
+    </node>
+
+    <node pkg="darcy_motion" name="teleop" type="darcy_teleop"/>
+
+</launch>
